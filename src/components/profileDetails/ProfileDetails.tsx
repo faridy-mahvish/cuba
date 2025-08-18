@@ -46,8 +46,8 @@ const getModeFromFeature = (variation: string) => {
 const ProfileDetails = () => {
   const api = ServiceConfig.getI().apiHandler;
   const auth = ServiceConfig.getI().authHandler;
-  const profileRef = useRef<HTMLDivElement>(null);
   const history = useHistory();
+  const profileRef = useRef<HTMLDivElement>(null);
   const [isCreatingProfile, setIsCreatingProfile] = useState<boolean>(false);
   const currentStudent = Util.getCurrentStudent();
   const location = useLocation();

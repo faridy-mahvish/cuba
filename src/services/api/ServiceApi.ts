@@ -3,16 +3,20 @@ import Course from "../../models/course";
 import Lesson from "../../models/lesson";
 import { StudentLessonResult } from "../../common/courseConstants";
 import {
+  CoordinatorAPIResponse,
   FilteredSchoolsForSchoolListingOps,
   LeaderboardDropdownList,
   LeaderboardRewards,
   MODEL,
   MODES,
+  PrincipalAPIResponse,
   PROFILETYPE,
   SchoolRoleMap,
+  StudentAPIResponse,
   TABLES,
   TableTypes,
   TabType,
+  TeacherAPIResponse,
 } from "../../common/constants";
 import { AvatarObj } from "../../components/animation/Avatar";
 import { DocumentData, Unsubscribe } from "firebase/firestore";
@@ -545,19 +549,13 @@ export interface ServiceApi {
   ): Promise<TableTypes<"assignment">[]>;
   /**
    * Gets schools for a user (teacher, principal, or ops user).
-   *
-   * If pagination options are provided, returns only the requested page.
-   * If not, returns all schools for the user (legacy behavior).
+   * returns all schools for the user (legacy behavior).
    *
    * @param {string} userId - User's unique ID
-   * @param {Object} [options] - Optional pagination settings
-   * @param {number} [options.page] - The page number to fetch (1-based)
-   * @param {number} [options.page_size] - Number of schools per page
    * @returns {Promise<{ school: TableTypes<"school">; role: RoleType }[]>}
    */
   getSchoolsForUser(
-    userId: string,
-    options?: { page?: number; page_size?: number }
+    userId: string
   ): Promise<{ school: TableTypes<"school">; role: RoleType }[]>;
 
   /**
@@ -1080,7 +1078,7 @@ export interface ServiceApi {
     type: string,
     batch_id: string,
     source: string | null,
-    created_at?: string,
+    created_at?: string
   ): Promise<boolean>;
 
   /**
@@ -1252,6 +1250,18 @@ export interface ServiceApi {
     schoolId: string
   ): Promise<TableTypes<"user">[] | undefined>;
   /**
+   * Fetches a paginated list of principal for a given school.
+   * @param {string} schoolId - The ID of the school.
+   * @param {number} [page=1] - The page number to fetch.
+   * @param {number} [limit=20] - The number of items per page.
+   * @returns A promise resolving to an object with principal data and a total count.
+   */
+  getPrincipalsForSchoolPaginated(
+    schoolId: string,
+    page?: number,
+    limit?: number
+  ): Promise<PrincipalAPIResponse>;
+  /**
    * This function gets all the coordinators for the school.
    * @param {string} schoolId school Id;
    * @return A promise to an array of coordinators.
@@ -1259,6 +1269,18 @@ export interface ServiceApi {
   getCoordinatorsForSchool(
     schoolId: string
   ): Promise<TableTypes<"user">[] | undefined>;
+  /**
+   * Fetches a paginated list of coordinators for a given school.
+   * @param {string} schoolId - The ID of the school.
+   * @param {number} [page=1] - The page number to fetch.
+   * @param {number} [limit=20] - The number of items per page.
+   * @returns A promise resolving to an object with coordinator data and a total count.
+   */
+  getCoordinatorsForSchoolPaginated(
+    schoolId: string,
+    page?: number,
+    limit?: number
+  ): Promise<CoordinatorAPIResponse>;
   /**
    * This function gets all the sponsors for the school.
    * @param {string} schoolId school Id;
@@ -1599,7 +1621,9 @@ export interface ServiceApi {
    * gets record from chpater_links table by QRCode link
    * @param link -Qrlink
    */
-  getChapterIdbyQrLink(link: string): Promise<TableTypes<"chapter_links"> | undefined>;
+  getChapterIdbyQrLink(
+    link: string
+  ): Promise<TableTypes<"chapter_links"> | undefined>;
   /**
    * Fetches all schools available to the admin user with pagination.
    * @param {number} limit - Number of schools to fetch.
@@ -1716,30 +1740,31 @@ export interface ServiceApi {
     error?: string;
   }>;
 
-  //  * Fetch detailed teacher information for a given school ID.
-  //  * @param {string} schoolId - The ID of the school to fetch.
-  //  * @returns Promise resolving to user details, grade, and classSection.
-  //  */
-  getTeacherInfoBySchoolId(schoolId: string): Promise<
-    {
-      user: TableTypes<"user">;
-      grade: number;
-      classSection: string;
-    }[]
-  >;
+  /**
+   * Fetch detailed, paginated teacher information for a given school ID.
+   * @param {string} schoolId - The ID of the school to fetch.
+   * @param {number} [page=1] - The page number to fetch.
+   * @param {number} [limit=20] - The number of items per page.
+   * @returns Promise resolving to an object with teacher data and a total count.
+   */
+  getTeacherInfoBySchoolId(
+    schoolId: string,
+    page: number,
+    limit: number
+  ): Promise<TeacherAPIResponse>;
 
   /**
-   * Fetch detailed student information for a given school ID.
+   * Fetch detailed, paginated student information for a given school ID.
    * @param {string} schoolId - The ID of the school to fetch.
-   * @returns Promise resolving to user details, grade, and classSection.
+   * @param {number} [page=1] - The page number to fetch.
+   * @param {number} [limit=20] - The number of items per page.
+   * @returns Promise resolving to an object with student data and a total count.
    */
-  getStudentInfoBySchoolId(schoolId: string): Promise<
-    {
-      user: TableTypes<"user">;
-      grade: number;
-      classSection: string;
-    }[]
-  >;
+  getStudentInfoBySchoolId(
+    schoolId: string,
+    page: number,
+    limit: number
+  ): Promise<StudentAPIResponse>;
 
   getClassesBySchoolId(schoolId: string): Promise<TableTypes<"class">[]>;
 
